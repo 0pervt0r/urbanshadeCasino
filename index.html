@@ -271,24 +271,6 @@ function calculateBonus(grid){
 
 
   
-  // редкий символ 👁️ +10 очков
-  if(Math.random()<0.01){ rare=true; points+=10; showWinMessage("Редкий символ! +10 крон"); }
-
-  for(let i=0;i<3;i++){
-    const row=[];
-    for(let j=0;j<3;j++){
-      let symbol;
-      if(rare && Math.random()<0.2) symbol="👁️";
-      else symbol=symbols[Math.floor(Math.random()*symbols.length)];
-      document.getElementById(`slot-${i}-${j}`).textContent=symbol;
-      document.getElementById(`slot-${i}-${j}`).classList.remove("win");
-      row.push(symbol);
-    }
-    grid.push(row);
-  }
-
-
-  
 // --- спин ---
 function spinReels(){
   if(points<=0){ alert("Очки закончились!"); return; }
