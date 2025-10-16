@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>FIREWALLED</title>
+<style>
+body {
+  font-family: system-ui, sans-serif;
+  background: #1c1c1c;
+  color: #eee;
+  text-align: center;
+  padding: 40px;
+}
+h1 { font-size: 5em; margin-bottom: 20px; text-align: center; }
+p { font-size: 1em; text-align: center; }
+#points { font-size: 1.2em; margin-bottom: 15px; }
+
+.slot-machine {
+  display: grid;
+  grid-template-columns: repeat(3, 80px);
+  grid-template-rows: repeat(3, 80px);
+  gap: 8px;
+  justify-content: center;
+  margin: 20px auto;
+}
+.slot {
+  background: #2c2c2c;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2em;
+  box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
+  transition: transform 0.3s;
+}
+.slot.win { animation: pop 0.5s ease; }
+@keyframes pop {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.5); }
+  100% { transform: scale(1); }
+}
+
+button {
+  margin: 10px;
+  padding: 10px 20px;
+  background: #444;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1em;
+  transition: background 0.2s;
+}
+button:hover { background: #666; }
+
+.shop {
+  margin-top: 30px;
+  padding: 20px;
+  background: #252525;
+  border-radius: 12px;
+  display: inline-block;
+}
+.shop-item {
+  margin: 10px 0;
+  padding: 10px;
+  border-radius: 10px;
+  background: #333;
+}
+
+.popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+  opacity: 0;
+  transition: 0.3s;
+}
+.popup.active { visibility: visible; opacity: 1; }
+.popup-content {
+  background: #222;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  max-width: 300px;
+}
+
+.win-message {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #222;
+  color: #fff;
+  padding: 12px 20px;
+  border-radius: 12px;
+  font-size: 18px;
+  animation: fade 2s ease forwards;
+  z-index: 1000;
+}
+@keyframes fade {
+  0% { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+  10% { opacity: 1; transform: translateX(-50%) translateY(0); }
+  90% { opacity: 1; }
+  100% { opacity: 0; transform: translateX(-50%) translateY(10px); }
+}
+</style>
+</head>
+<body>
+
+<h1>FIREWALLED</h1>
+<p>Помните, что это казино является частью художественного вымысла, которое не стоит воспринимать всерьёз. Азартные игры несут риски: финансовые потери, долги и зависимость.</p>
+<p>Относитесь к азарту ответственно. В долгосрочной перспективе казино всегда остаётся в выигрыше, а игрок ⸺ в проигрыше.</p>
+
+<div id="points">Кроны: 0</div>
+<button onclick="spinReels()">Крутить!</button>
+
+<div class="slot-machine">
+  <div class="slot" id="slot-0-0">🕊️</div>
+  <div class="slot" id="slot-0-1">🦈</div>
+  <div class="slot" id="slot-0-2">💎</div>
+  <div class="slot" id="slot-1-0">🦾</div>
+  <div class="slot" id="slot-1-1">🥼</div>
+  <div class="slot" id="slot-1-2">🦢</div>
+  <div class="slot" id="slot-2-0">🐧</div>
+  <div class="slot" id="slot-2-1">🦢</div>
+  <div class="slot" id="slot-2-2">🐧</div>
+</div>
+
+<div class="shop">
+  <h3>🛒 Магазин</h3>
+  <div class="shop-item">
+    <span>Купон «Анкета без пробных постов (для ФП)»</span><br/>
+    <button onclick="buyItem('Купон «Анкета без пробных постов (для ФП)»', 500)">Купить за 500 крон</button>
+  </div>
+  <div class="shop-item">
+    <span>🐦 "Покровитель птиц"</span><br/>
+    <button onclick="buyItem('Покровитель птиц', 8)">Купить за 8 крон</button>
+  </div>
+</div>
+
+<div class="popup" id="popup">
+  <div class="popup-content">
+    <h2 id="popup-title">Поздравляем!</h2>
+    <p id="popup-text"></p>
+    <button onclick="closePopup()">Закрыть</button>
+  </div>
+</div>
+
+<script>
+const symbols = ["🦢","🥼","🦾","💎","🕊️","🦈","🕵️","🦐","🦀","🐳","🏆","📸"];
+let points = 50;
+let streak = 0;
+
+// --- загрузка / сохранение ---
+function loadState() {
+  const saved = JSON.parse(localStorage.getItem("slot-state"));
+  if(saved){ points = saved.points; }
+  updatePoints();
+}
+function saveState(){ localStorage.setItem("slot-state", JSON.stringify({points})); }
+function updatePoints(){ document.getElementById("points").textContent = "Кроны: " + points; }
+
+// --- сообщения ---
+function showWinMessage(msg){
+  const div = document.createElement("div");
+  div.className="win-message";
+  div.textContent=msg;
+  document.body.appendChild(div);
+  setTimeout(()=>div.remove(),2000);
+}
+function showPopup(title,text){
+  document.getElementById("popup-title").textContent = title;
+  document.getElementById("popup-text").textContent = text;
+  document.getElementById("popup").classList.add("active");
+}
+function closePopup(){ document.getElementById("popup").classList.remove("active"); }
+
+// --- анимации ---
+function animateRow(index,type){
+  for(let i=0;i<3;i++){
+    let el = (type==="h") ? document.getElementById(`slot-${index}-${i}`) : document.getElementById(`slot-${i}-${index}`);
+    el.classList.add("win");
+  }
+}
+function animateDiagonal(dir){
+  if(dir==="main"){ [[0,0],[1,1],[2,2]].forEach(([i,j])=>document.getElementById(`slot-${i}-${j}`).classList.add("win")); }
+  else{ [[0,2],[1,1],[2,0]].forEach(([i,j])=>document.getElementById(`slot-${i}-${j}`).classList.add("win")); }
+}
+
+// --- бонусы ---
+function calculateBonus(grid){
+  let bonus=0;
+  const flat=grid.flat();
+  const counts={};
+  for(let s of flat){ counts[s]=(counts[s]||0)+1; }
+
+  // 3 в ряд горизонтально / вертикально / диагонали
+  for(let i=0;i<3;i++){
+    if(grid[i][0]===grid[i][1] && grid[i][1]===grid[i][2]){ bonus+=2; animateRow(i,"h"); }
+    if(grid[0][i]===grid[1][i] && grid[1][i]===grid[2][i]){ bonus+=2; animateRow(i,"v"); }
+  }
+  if(grid[0][0]===grid[1][1] && grid[1][1]===grid[2][2]){ bonus+=2; animateDiagonal("main"); }
+  if(grid[0][2]===grid[1][1] && grid[1][1]===grid[2][0]){ bonus+=2; animateDiagonal("anti"); }
+
+  // 4 / 6 / 9 одинаковых
+  for(const s in counts){
+    if(counts[s]>=4 && counts[s]<6) bonus+=4;
+    if(counts[s]>=6 && counts[s]<9) bonus+=6;
+    if(counts[s]===9) bonus+=15;
+  }
+
+  return bonus;
+}
+
+// --- спин ---
+function spinReels(){
+  if(points<=0){ alert("Очки закончились!"); return; }
+  points--;
+  updatePoints();
+
+  const grid=[];
+  for(let i=0;i<3;i++){
+    const row=[];
+    for(let j=0;j<3;j++){
+      const symbol=symbols[Math.floor(Math.random()*symbols.length)];
+      document.getElementById(`slot-${i}-${j}`).textContent=symbol;
+      document.getElementById(`slot-${i}-${j}`).classList.remove("win");
+      row.push(symbol);
+    }
+    grid.push(row);
+  }
+
+  let bonus=calculateBonus(grid);
+
+  if(bonus>0){
+    streak++;
+    points+=bonus;
+    updatePoints();
+    showWinMessage(`Комбо! +${bonus} крон (x${streak})`);
+  } else streak=0;
+
+  saveState();
+}
+
+// --- магазин ---
+function buyItem(name, cost){
+  if(points<cost){ alert("Недостаточно крон!"); return; }
+  points-=cost;
+  updatePoints();
+  saveState();
+  const id=Math.floor(Math.random()*1000000);
+  showPopup(`Ты приобрёл "${name}"!`, `ID: ${id}`);
+}
+
+loadState();
+</script>
+</body>
+</html>
