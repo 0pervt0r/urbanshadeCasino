@@ -135,7 +135,7 @@ button:hover { background: #666; }
   <p>Скрин чека приобретённого товара (кроме шоколадки) скидывать в анкетницу сетки.</p>
       <div class="shop-item">
     <span>Шоколадка «Eclipse Bar»</span><br/>
-    <button onclick="buyItem('Шоколадкe «Eclipse Bar»', 50)">Купить за 50 крон</button>
+    <button onclick="buyItem('Шоколадку «Eclipse Bar»', 50)">Купить за 50 крон</button>
   </div>
       <div class="shop-item">
     <span>Бронь (для КП) на 10 дней</span><br/>
@@ -176,6 +176,42 @@ function loadState() {
 }
 function saveState(){ localStorage.setItem("slot-state", JSON.stringify({points})); }
 function updatePoints(){ document.getElementById("points").textContent = "Кроны: " + points; }
+
+  const DAILY_CRON = 25;
+
+function loadState() {
+  const saved = JSON.parse(localStorage.getItem("slot-state"));
+  const now = new Date();
+  
+  if(saved) {
+    points = saved.points || 0;
+    
+    // Проверка последнего начисления
+    const lastClaim = new Date(saved.lastClaim || 0);
+    const diff = now - lastClaim;
+    
+    // Если прошёл хотя бы один день (24 часа)
+    if(diff >= 24*60*60*1000) {
+      points += DAILY_CRON;
+      saveState(); // обновляем дату
+    }
+    
+  } else {
+    // первый заход
+    points = DAILY_CRON;
+    saveState();
+  }
+
+  updatePoints();
+}
+
+function saveState() {
+  localStorage.setItem("slot-state", JSON.stringify({
+    points: points,
+    lastClaim: new Date()
+  }));
+}
+
 
 // --- сообщения ---
 function showWinMessage(msg){
