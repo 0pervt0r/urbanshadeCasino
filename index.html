@@ -269,17 +269,11 @@ function calculateBonus(grid){
   return bonus;
 }
 
-// --- спин ---
-function spinReels(){
-  if(points<=0){ alert("Очки закончились!"); return; }
-  points--;
-  updatePoints();
-
   const grid=[];
   let fire=false, rare=false;
 
   // редкий символ 👁️ +10 очков
-  if(Math.random()<0.01){ rare=true; points+=10; showWinMessage("Редкий символ 👁️! +10 крон"); }
+  if(Math.random()<0.01){ rare=true; points+=10; showWinMessage("Редкий символ! +10 крон"); }
   if(Math.random()<0.01) fire=true;
 
   for(let i=0;i<3;i++){
@@ -295,6 +289,12 @@ function spinReels(){
     }
     grid.push(row);
   }
+
+// --- спин ---
+function spinReels(){
+  if(points<=0){ alert("Очки закончились!"); return; }
+  points--;
+  updatePoints();
 
   let bonus=calculateBonus(grid);
   if(fire) bonus*=2;
