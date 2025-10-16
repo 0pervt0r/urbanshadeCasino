@@ -131,6 +131,7 @@ button:hover { background: #666; }
 </div>
 
 <div class="shop">
+<div class="shop">
   <h3>🛒 Магазин</h3>
   <p>Скрин чека приобретённого товара (кроме шоколадки) скидывать в анкетницу сетки.</p>
       <div class="shop-item">
@@ -158,6 +159,7 @@ button:hover { background: #666; }
     <button onclick="buyItem('разбан', 1000000)">Купить за 1000000 крон</button>
   </div>
 </div>
+</div>
 
 <div class="popup" id="popup">
   <div class="popup-content">
@@ -168,7 +170,7 @@ button:hover { background: #666; }
 </div>
 
 <script>
-const symbols = ["🦢","🥼","🦾","💎","🕊️","🦈","🕵️","🦐","📸"];
+const symbols = ["🦢","🥼","🦾","💎","🕊️","🦈","🕵️","🦐","🦀","🐳","🏆","📸"];
 let points = 50;
 let streak = 0;
 
@@ -180,42 +182,6 @@ function loadState() {
 }
 function saveState(){ localStorage.setItem("slot-state", JSON.stringify({points})); }
 function updatePoints(){ document.getElementById("points").textContent = "Кроны: " + points; }
-
-  const DAILY_CRON = 25;
-
-function loadState() {
-  const saved = JSON.parse(localStorage.getItem("slot-state"));
-  const now = new Date();
-  
-  if(saved) {
-    points = saved.points || 0;
-    
-    // Проверка последнего начисления
-    const lastClaim = new Date(saved.lastClaim || 0);
-    const diff = now - lastClaim;
-    
-    // Если прошёл хотя бы один день (24 часа)
-    if(diff >= 24*60*60*1000) {
-      points += DAILY_CRON;
-      saveState(); // обновляем дату
-    }
-    
-  } else {
-    // первый заход
-    points = DAILY_CRON;
-    saveState();
-  }
-
-  updatePoints();
-}
-
-function saveState() {
-  localStorage.setItem("slot-state", JSON.stringify({
-    points: points,
-    lastClaim: new Date()
-  }));
-}
-
 
 // --- сообщения ---
 function showWinMessage(msg){
@@ -253,32 +219,26 @@ function calculateBonus(grid){
 
   // 3 в ряд горизонтально / вертикально / диагонали
   for(let i=0;i<3;i++){
-    if(grid[i][0]===grid[i][1] && grid[i][1]===grid[i][2]){ bonus+=5; animateRow(i,"h"); }
-    if(grid[0][i]===grid[1][i] && grid[1][i]===grid[2][i]){ bonus+=5; animateRow(i,"v"); }
+    if(grid[i][0]===grid[i][1] && grid[i][1]===grid[i][2]){ bonus+=2; animateRow(i,"h"); }
+    if(grid[0][i]===grid[1][i] && grid[1][i]===grid[2][i]){ bonus+=2; animateRow(i,"v"); }
   }
-  if(grid[0][0]===grid[1][1] && grid[1][1]===grid[2][2]){ bonus+=5; animateDiagonal("main"); }
-  if(grid[0][2]===grid[1][1] && grid[1][1]===grid[2][0]){ bonus+=5; animateDiagonal("anti"); }
+  if(grid[0][0]===grid[1][1] && grid[1][1]===grid[2][2]){ bonus+=2; animateDiagonal("main"); }
+  if(grid[0][2]===grid[1][1] && grid[1][1]===grid[2][0]){ bonus+=2; animateDiagonal("anti"); }
 
   // 4 / 6 / 9 одинаковых
   for(const s in counts){
-    if(counts[s]>=4 && counts[s]<6) bonus+=8;
-    if(counts[s]>=6 && counts[s]<9) bonus+=12;
-    if(counts[s]===9) bonus+=18;
+    if(counts[s]>=4 && counts[s]<6) bonus+=4;
+    if(counts[s]>=6 && counts[s]<9) bonus+=6;
+    if(counts[s]===9) bonus+=15;
   }
 
   return bonus;
 }
 
-
-  
 // --- спин ---
 function spinReels(){
-  if(points<=0){ alert("Очки закончились!"); return; }
   points--;
   updatePoints();
-
-  let bonus=calculateBonus(grid);
-  if(fire) bonus*=2;
 
   const grid=[];
   for(let i=0;i<3;i++){
@@ -315,7 +275,6 @@ function buyItem(name, cost){
 }
 
 loadState();
-  
 </script>
 </body>
 </html>
