@@ -269,19 +269,16 @@ function calculateBonus(grid){
   return bonus;
 }
 
-  const grid=[];
-  let fire=false, rare=false;
 
+  
   // редкий символ 👁️ +10 очков
-  if(Math.random()<0.01){ rare=true; points+=10; showWinMessage("Редкий символ 👁️! +10 крон"); }
-  if(Math.random()<0.01) fire=true;
+  if(Math.random()<0.01){ rare=true; points+=10; showWinMessage("Редкий символ! +10 крон"); }
 
   for(let i=0;i<3;i++){
     const row=[];
     for(let j=0;j<3;j++){
       let symbol;
       if(rare && Math.random()<0.2) symbol="👁️";
-      else if(fire && Math.random()<0.2) symbol="🔥";
       else symbol=symbols[Math.floor(Math.random()*symbols.length)];
       document.getElementById(`slot-${i}-${j}`).textContent=symbol;
       document.getElementById(`slot-${i}-${j}`).classList.remove("win");
@@ -289,6 +286,8 @@ function calculateBonus(grid){
     }
     grid.push(row);
   }
+
+
   
 // --- спин ---
 function spinReels(){
