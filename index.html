@@ -136,10 +136,6 @@ button:hover { background: #666; }
     <span>Купон «Анкета без пробных постов (для ФП)»</span><br/>
     <button onclick="buyItem('Купон «Анкета без пробных постов (для ФП)»', 500)">Купить за 500 крон</button>
   </div>
-  <div class="shop-item">
-    <span>🐦 "Покровитель птиц"</span><br/>
-    <button onclick="buyItem('Покровитель птиц', 8)">Купить за 8 крон</button>
-  </div>
 </div>
 
 <div class="popup" id="popup">
@@ -218,7 +214,7 @@ function calculateBonus(grid){
 
 // --- спин ---
 function spinReels(){
-  if(points<=0){ alert("Очки закончились!"); return; }
+  if(points<=0){ alert("Кроны закончились!"); return; }
   points--;
   updatePoints();
 
