@@ -236,6 +236,10 @@ function calculateBonus(grid){
 
 // --- спин ---
 function spinReels(){
+If (points <= 0) {
+  alert("Недостаточно крон! Приходи завтра");
+  return;
+}
   points--;
   updatePoints();
 
