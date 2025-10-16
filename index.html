@@ -316,10 +316,6 @@ loadState();
 <div id="wheel">🎯</div>
 <button id="spinBtn">Крутить рулетку</button>
 
-<script>
-const DAILY_POINTS = 25;  // очки за ежедневный спин
-let points = 0;
-
 // --- Загрузка и проверка последнего спина ---
 function loadState() {
   const saved = JSON.parse(localStorage.getItem("roulette-state"));
