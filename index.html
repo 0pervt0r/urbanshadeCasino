@@ -307,16 +307,16 @@ function calculateBonus(grid){
   for(let s of flat){ counts[s]=(counts[s]||0)+1; }
 
   for(let i=0;i<3;i++){
-    if(grid[i][0]===grid[i][1] && grid[i][1]===grid[i][2]){ bonus+=5; animateRow(i,"h"); }
-    if(grid[0][i]===grid[1][i] && grid[1][i]===grid[2][i]){ bonus+=5; animateRow(i,"v"); }
+    if(grid[i][0]===grid[i][1] && grid[i][1]===grid[i][2]){ bonus+=10; animateRow(i,"h"); }
+    if(grid[0][i]===grid[1][i] && grid[1][i]===grid[2][i]){ bonus+=10; animateRow(i,"v"); }
   }
-  if(grid[0][0]===grid[1][1] && grid[1][1]===grid[2][2]){ bonus+=5; animateDiagonal("main"); }
-  if(grid[0][2]===grid[1][1] && grid[1][1]===grid[2][0]){ bonus+=5; animateDiagonal("anti"); }
+  if(grid[0][0]===grid[1][1] && grid[1][1]===grid[2][2]){ bonus+=10; animateDiagonal("main"); }
+  if(grid[0][2]===grid[1][1] && grid[1][1]===grid[2][0]){ bonus+=10; animateDiagonal("anti"); }
 
   for(const s in counts){
-    if(counts[s]>=4 && counts[s]<10) bonus+=4;
-    if(counts[s]>=6 && counts[s]<15) bonus+=6;
-    if(counts[s]===9) bonus+=20;
+    if(counts[s]>=4 && counts[s]<20) bonus+=4;
+    if(counts[s]>=6 && counts[s]<35) bonus+=6;
+    if(counts[s]===9) bonus+=50;
   }
 
   return bonus;
