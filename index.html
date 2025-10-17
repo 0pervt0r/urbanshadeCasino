@@ -107,6 +107,47 @@ button:hover { background: #666; }
   90% { opacity: 1; }
   100% { opacity: 0; transform: translateX(-50%) translateY(10px); }
 }
+
+/* Ежедневный бонус — popup */
+.daily-bonus-popup {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.5s ease;
+  z-index: 2000;
+}
+.daily-bonus-popup.active {
+  visibility: visible;
+  opacity: 1;
+}
+.daily-bonus-content {
+  background: radial-gradient(circle at center, #292929, #1b1b1b);
+  border: 2px solid #ffd700;
+  box-shadow: 0 0 20px #ffd70088;
+  border-radius: 15px;
+  padding: 30px 40px;
+  text-align: center;
+  color: #fff;
+  animation: glow 1.5s ease-in-out infinite alternate;
+}
+.daily-bonus-content h2 {
+  font-size: 28px;
+  color: #ffd700;
+  margin-bottom: 10px;
+}
+.daily-bonus-content p {
+  font-size: 18px;
+  margin-bottom: 20px;
+}
+@keyframes glow {
+  from { box-shadow: 0 0 10px #ffd70055; }
+  to { box-shadow: 0 0 25px #ffd700; }
+}
 </style>
 </head>
 <body>
@@ -162,7 +203,6 @@ button:hover { background: #666; }
     <button onclick="buyItem('разбан', 1000000)">Купить за 1000000 крон</button>
   </div>
 </div>
-</div>
 
 <div class="popup" id="popup">
   <div class="popup-content">
@@ -172,19 +212,65 @@ button:hover { background: #666; }
   </div>
 </div>
 
+<!-- Ежедневный бонус -->
+<div class="daily-bonus-popup" id="dailyBonusPopup">
+  <div class="daily-bonus-content">
+    <h2>🎁 Ежедневный бонус!</h2>
+    <p>+25 крон за вход сегодня</p>
+    <button onclick="closeDailyBonus()">Забрать</button>
+  </div>
+</div>
+
 <script>
 const symbols = ["🦢","🥼","🦾","🕊️","🦈","🕵️","🦐","🦀","🐳","📸"];
 let points = 50;
 let streak = 0;
+const DAILY_BONUS = 25;
 
 // --- загрузка / сохранение ---
 function loadState() {
   const saved = JSON.parse(localStorage.getItem("slot-state"));
-  if(saved){ points = saved.points; }
+  const today = new Date().toDateString();
+
+  if (saved) {
+    points = saved.points || 0;
+    const lastClaim = saved.lastClaim || null;
+
+    if (lastClaim !== today) {
+      points += DAILY_BONUS;
+      showDailyBonus();
+      saved.lastClaim = today;
+    }
+    localStorage.setItem("slot-state", JSON.stringify(saved));
+  } else {
+    localStorage.setItem("slot-state", JSON.stringify({
+      points,
+      lastClaim: today
+    }));
+  }
   updatePoints();
 }
-function saveState(){ localStorage.setItem("slot-state", JSON.stringify({points})); }
-function updatePoints(){ document.getElementById("points").textContent = "Кроны: " + points; }
+
+function saveState(){
+  const data = JSON.parse(localStorage.getItem("slot-state")) || {};
+  data.points = points;
+  data.lastClaim = data.lastClaim || new Date().toDateString();
+  localStorage.setItem("slot-state", JSON.stringify(data));
+}
+
+function updatePoints(){
+  document.getElementById("points").textContent = "Кроны: " + points;
+}
+
+// --- ежедневный бонус popup ---
+function showDailyBonus(){
+  document.getElementById("dailyBonusPopup").classList.add("active");
+}
+function closeDailyBonus(){
+  document.getElementById("dailyBonusPopup").classList.remove("active");
+  updatePoints();
+  saveState();
+}
 
 // --- сообщения ---
 function showWinMessage(msg){
@@ -220,7 +306,6 @@ function calculateBonus(grid){
   const counts={};
   for(let s of flat){ counts[s]=(counts[s]||0)+1; }
 
-  // 3 в ряд горизонтально / вертикально / диагонали
   for(let i=0;i<3;i++){
     if(grid[i][0]===grid[i][1] && grid[i][1]===grid[i][2]){ bonus+=5; animateRow(i,"h"); }
     if(grid[0][i]===grid[1][i] && grid[1][i]===grid[2][i]){ bonus+=5; animateRow(i,"v"); }
@@ -228,7 +313,6 @@ function calculateBonus(grid){
   if(grid[0][0]===grid[1][1] && grid[1][1]===grid[2][2]){ bonus+=5; animateDiagonal("main"); }
   if(grid[0][2]===grid[1][1] && grid[1][1]===grid[2][0]){ bonus+=5; animateDiagonal("anti"); }
 
-  // 4 / 6 / 9 одинаковых
   for(const s in counts){
     if(counts[s]>=4 && counts[s]<10) bonus+=4;
     if(counts[s]>=6 && counts[s]<15) bonus+=6;
@@ -240,10 +324,10 @@ function calculateBonus(grid){
 
 // --- спин ---
 function spinReels(){
-if (points <= 0) {
-  alert("Недостаточно крон! Приходи завтра");
-  return;
-}
+  if (points <= 0) {
+    alert("Недостаточно крон! Приходи завтра");
+    return;
+  }
   points--;
   updatePoints();
 
@@ -285,3 +369,4 @@ loadState();
 </script>
 </body>
 </html>
+
